@@ -21,6 +21,7 @@ from styles import (
     get_upload_success_html,
     get_score_html,
     get_metric_card_html,
+    get_section_header_html,
     get_footer_html
 )
 
@@ -244,7 +245,7 @@ with st.sidebar:
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
-    st.markdown("### 📄 Upload Resume")
+    st.markdown(get_section_header_html("📄", "Upload Resume"), unsafe_allow_html=True)
     fileName = st.file_uploader(
         "Choose your resume file",
         type=["pdf", "docx", "txt"],
@@ -260,11 +261,11 @@ with col1:
         )
 
 with col2:
-    st.markdown("### 💼 Job Description")
+    st.markdown(get_section_header_html("💼", "Job Description"), unsafe_allow_html=True)
     job_desc = st.text_area(
         "Paste the job description here:",
         height=240,
-        placeholder="Paste the complete job description including requirements, responsibilities, and qualifications...",
+        placeholder="Paste the complete job description including:\n\n• Required qualifications and skills\n• Job responsibilities\n• Experience requirements\n• Technical competencies\n• Educational background\n\nThe more detailed, the better the analysis!",
         help="Include the complete job posting for better analysis",
         label_visibility="collapsed"
     )

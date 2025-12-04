@@ -251,35 +251,121 @@ def get_custom_css(theme="Light"):
         letter-spacing: 0.5px;
     }}
     
-    /* Upload Area Styling */
+    /* Enhanced Upload Area */
     .stFileUploader {{
-        border: 3px dashed {colors['border']};
-        border-radius: 20px;
-        padding: 2rem;
-        background: {colors['card_bg']};
-        transition: all 0.3s ease;
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
     }}
     
-    .stFileUploader:hover {{
-        border-color: {colors['primary']};
-        background: linear-gradient(135deg, {colors['card_bg']}, {colors['bg_secondary']});
-        transform: scale(1.02);
+    .stFileUploader > div {{
+        border: none !important;
+        background: transparent !important;
+    }}
+    
+    .stFileUploader > div > div {{
+        background: linear-gradient(145deg, {colors['card_bg']}, {colors['bg_secondary']}) !important;
+        border: 3px dashed {colors['border']} !important;
+        border-radius: 24px !important;
+        padding: 3rem 2rem !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        box-shadow: 0 10px 30px {colors['shadow']} !important;
+        position: relative !important;
+        overflow: hidden !important;
+        min-height: 280px !important;
+    }}
+    
+    .stFileUploader > div > div::before {{
+        content: '📄';
+        position: absolute;
+        font-size: 4rem;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -60%);
+        opacity: 0.1;
+        z-index: 0;
+    }}
+    
+    .stFileUploader > div > div:hover {{
+        border-color: {colors['primary']} !important;
+        background: linear-gradient(145deg, {colors['primary']}15, {colors['secondary']}15) !important;
+        transform: translateY(-5px) !important;
+        box-shadow: 0 15px 40px {colors['shadow']} !important;
+        border-style: solid !important;
+    }}
+    
+    .stFileUploader label {{
+        display: none !important;
+    }}
+    
+    .stFileUploader button {{
+        background: linear-gradient(135deg, {colors['primary']}, {colors['secondary']}) !important;
+        color: white !important;
+        border: none !important;
+        padding: 0.8rem 2rem !important;
+        border-radius: 50px !important;
+        font-weight: 600 !important;
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3) !important;
+        transition: all 0.3s ease !important;
+        z-index: 1 !important;
+        position: relative !important;
+    }}
+    
+    .stFileUploader button:hover {{
+        transform: translateY(-2px) !important;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4) !important;
+    }}
+    
+    .stFileUploader small {{
+        color: {colors['text_secondary']} !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
     }}
     
     /* Enhanced Text Area */
+    .stTextArea {{
+        height: 100% !important;
+    }}
+    
+    .stTextArea > div {{
+        height: 100% !important;
+    }}
+    
+    .stTextArea > div > div {{
+        height: 100% !important;
+    }}
+    
     .stTextArea textarea {{
-        border-radius: 16px !important;
-        border: 2px solid {colors['border']} !important;
-        padding: 1rem !important;
-        font-size: 0.95rem !important;
-        background: {colors['card_bg']} !important;
+        border-radius: 24px !important;
+        border: 3px solid {colors['border']} !important;
+        padding: 1.5rem !important;
+        font-size: 1rem !important;
+        background: linear-gradient(145deg, {colors['card_bg']}, {colors['bg_secondary']}) !important;
         color: {colors['text']} !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        box-shadow: 0 10px 30px {colors['shadow']} !important;
+        line-height: 1.6 !important;
+        font-family: 'Inter', sans-serif !important;
+        min-height: 280px !important;
+        resize: none !important;
+    }}
+    
+    .stTextArea textarea::placeholder {{
+        color: {colors['text_secondary']} !important;
+        opacity: 0.6 !important;
     }}
     
     .stTextArea textarea:focus {{
         border-color: {colors['primary']} !important;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+        box-shadow: 0 15px 40px {colors['shadow']}, 0 0 0 4px {colors['primary']}20 !important;
+        transform: translateY(-3px) !important;
+        background: {colors['card_bg']} !important;
+    }}
+    
+    .stTextArea textarea:hover {{
+        border-color: {colors['primary']}80 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 12px 35px {colors['shadow']} !important;
     }}
     
     /* Enhanced Button */
@@ -540,6 +626,33 @@ def get_metric_card_html(value, label):
     <div class="metric-card">
         <p class="metric-value">{value}</p>
         <p class="metric-label">{label}</p>
+    </div>
+    """
+
+
+def get_section_header_html(icon, title):
+    """Returns styled section header HTML"""
+    return f"""
+    <div style="
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        border-radius: 16px;
+        border-left: 4px solid #6366f1;
+    ">
+        <span style="font-size: 2rem;">{icon}</span>
+        <h3 style="
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        ">{title}</h3>
     </div>
     """
 
