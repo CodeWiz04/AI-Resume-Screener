@@ -619,4 +619,3 @@ def get_score_html(score, score_type):
     </div>
     """, message
 
-
