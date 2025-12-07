@@ -157,5 +157,47 @@ def calculate_ultra_keyword_overlap(resume_text, job_text):
                     break
     
     # Level 3: Word overlap in phrases (any common word)
+    for job_term in job_all_terms:
+        if job_term in matched_terms:
+            continue
+        job_words = set(job_term.split())
+        for resume_term in resume_all_terms:
+            resume_words = set(resume_term.split())
+            if job_words.intersection(resume_words):
+                matched_terms.add(job_term)
+                break
+    
+    # Level 4: Character similarity (70% threshold)
+    for job_term in job_all_terms:
+        if job_term in matched_terms or len(job_term) < 3:
+            continue
+        for resume_term in resume_all_terms:
+            if len(resume_term) < 3:
+                continue
+            # Calculate character overlap
+            min_len = min(len(job_term), len(resume_term))
+            max_len = max(len(job_term), len(resume_term))
+            if min_len / max_len < 0.5:  # Too different in length
+                continue
+            matching = sum(1 for a, b in zip(job_term, resume_term) if a == b)
+            if matching / max_len > 0.7:
+                matched_terms.add(job_term)
+                break
+    
+    # Level 5: Stem/root matching (crude but effective)
+    for job_term in job_all_terms:
+        if job_term in matched_terms or len(job_term) < 4:
+            continue
+        job_root = job_term[:5]  # First 5 chars as "root"
+        for resume_term in resume_all_terms:
+            if len(resume_term) < 4:
+                continue
+            resume_root = resume_term[:5]
+            if job_root == resume_root:
+                matched_terms.add(job_term)
+                break
+    
+    # Calculate base percentage
+
 
 
