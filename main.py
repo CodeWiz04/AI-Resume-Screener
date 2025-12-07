@@ -374,38 +374,7 @@ if analyze_button:
         
         st.info(f"📝 **Analysis Result:** {message}")
 
-        # Detailed analysis section
-        if show_details:
-            st.markdown("---")
-            st.markdown("## 📊 Detailed Analysis")
-            
-            # Create metrics in a beautiful layout
-            metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
-            
-            with metric_col1:
-                st.markdown(
-                    get_metric_card_html(f"{semantic_max*100:.1f}%", "Best Semantic Match"),
-                    unsafe_allow_html=True
-                )
-            
-            with metric_col2:
-                st.markdown(
-                    get_metric_card_html(f"{semantic_avg*100:.1f}%", "Avg Semantic Match"),
-                    unsafe_allow_html=True
-                )
-            
-            with metric_col3:
-                st.markdown(
-                    get_metric_card_html(f"{tfidf_similarity*100:.1f}%", "TF-IDF Similarity"),
-                    unsafe_allow_html=True
-                )
-            
-            with metric_col4:
-                st.markdown(
-                    get_metric_card_html(f"{keyword_overlap_pct:.1f}%", "Keyword Overlap"),
-                    unsafe_allow_html=True
-                )
-
+ 
             # Score visualization
             if show_visualization and analysis_type == "Composite Score (Recommended)":
                 st.markdown("<br>", unsafe_allow_html=True)
