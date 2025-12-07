@@ -15,3 +15,23 @@ import time
 import nltk
 
 # Import custom styling
+from styles import (
+    get_custom_css, 
+    get_header_html, 
+    get_upload_success_html,
+    get_score_html,
+    get_metric_card_html,
+    get_section_header_html,
+    get_footer_html
+)
+
+# Page config
+st.set_page_config(
+    page_title="AI Resume Screener",
+    page_icon="🎯",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Sidebar theme toggle
+
