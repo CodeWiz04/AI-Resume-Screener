@@ -342,3 +342,83 @@ if analyze_button:
             progress_bar.progress(80)
 
         
+            if analysis_type == "Composite Score (Recommended)":
+                final_score = calculate_composite_score(semantic_max, semantic_avg, tfidf_similarity, keyword_overlap_pct)
+                score_type = "Composite"
+            elif analysis_type == "Semantic Only":
+                final_score = semantic_max * 100
+                score_type = "Semantic"
+            elif analysis_type == "Keyword Only":
+                final_score = keyword_overlap_pct
+                score_type = "Keyword Overlap"
+            elif analysis_type == "TF-IDF Only":
+                final_score = tfidf_similarity * 100
+                score_type = "TF-IDF"
+
+            final_score = min(round(final_score, 2), 100)
+            
+            progress_bar.progress(100)
+            status_text.text("✅ Analysis complete!")
+            time.sleep(0.5)
+            
+            # Clear progress indicators
+            progress_bar.empty()
+            status_text.empty()
+
+        # Display results with custom styling
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Main score display
+        score_html, message = get_score_html(final_score, score_type)
+        st.markdown(score_html, unsafe_allow_html=True)
+        
+        st.info(f"📝 *Analysis Result:* {message}")
+
+        # Detailed analysis section
+        if show_details:
+            st.markdown("---")
+            st.markdown("## 📊 Detailed Analysis")
+            
+            # Create metrics in a beautiful layout
+            metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
+            
+            with metric_col1:
+                st.markdown(
+                    get_metric_card_html(f"{semantic_max*100:.1f}%", "Best Semantic Match"),
+                    unsafe_allow_html=True
+                )
+            
+            with metric_col2:
+                st.markdown(
+                    get_metric_card_html(f"{semantic_avg*100:.1f}%", "Avg Semantic Match"),
+                    unsafe_allow_html=True
+                )
+            
+            with metric_col3:
+                st.markdown(
+                    get_metric_card_html(f"{tfidf_similarity*100:.1f}%", "TF-IDF Similarity"),
+                    unsafe_allow_html=True
+                )
+            
+            with metric_col4:
+                st.markdown(
+                    get_metric_card_html(f"{keyword_overlap_pct:.1f}%", "Keyword Overlap"),
+                    unsafe_allow_html=True
+                )
+
+            # Score visualization
+            if show_visualization and analysis_type == "Composite Score (Recommended)":
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown("### 📈 Score Breakdown")
+                scores_dict = {
+                    "Semantic Max": semantic_max * 100,
+                    "Semantic Avg": semantic_avg * 100,
+                    "TF-IDF": tfidf_similarity * 100,
+                    "Keywords": keyword_overlap_pct
+                }
+                fig = create_score_visualization(scores_dict)
+                st.plotly_chart(fig, use_container_width=True)
+
+# Footer
+st.markdown("---")
+st.markdown(get_footer_html(), unsafe_allow_html=True)
