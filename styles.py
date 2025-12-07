@@ -658,7 +658,7 @@ def get_footer_html():
     """Returns the footer HTML"""
     return """
     <div class="footer">
-        <p>Made with ❤️ using Streamlit • Advanced AI Resume Analysis • Version 2.0</p>
-        <p style="margin-top: 0.5rem; font-size: 0.85rem;">Powered by state-of-the-art NLP and Machine Learning</p>
+        <p>Made with ❤️ using Streamlit • Advanced AI Resume Analysis • Version 1.0</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">Powered by NLP and Machine Learning</p>
     </div>
     """
