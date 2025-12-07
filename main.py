@@ -513,6 +513,262 @@ with st.sidebar:
     """)
 
 # Main content
+col1, col2 = st.columns([1, 1], gap="large")
+
+with col1:
+    st.markdown(get_section_header_html("📄", "Upload Resume"), unsafe_allow_html=True)
+    fileName = st.file_uploader(
+        "Choose your resume file",
+        type=["pdf", "docx", "txt"],
+        help="Supported formats: PDF, DOCX, TXT",
+        label_visibility="collapsed"
+    )
+    
+    if fileName is not None:
+        st.markdown(
+            get_upload_success_html(fileName.name, fileName.size),
+            unsafe_allow_html=True
+        )
+
+with col2:
+    st.markdown(get_section_header_html("💼", "Job Description"), unsafe_allow_html=True)
+    job_desc = st.text_area(
+        "Paste the job description here:",
+        height=240,
+        placeholder="Paste the complete job description including:\n\n• Required qualifications and skills\n• Job responsibilities\n• Experience requirements\n• Technical competencies\n• Educational background\n\nThe more detailed, the better the analysis!",
+        help="Include the complete job posting for better analysis",
+        label_visibility="collapsed"
+    )
+
+# Analysis button
+st.markdown("<br>", unsafe_allow_html=True)
+col_center = st.columns([1, 2, 1])[1]
+with col_center:
+    analyze_button = st.button(
+        "🚀 Analyze Resume Match",
+        type="primary",
+        use_container_width=True,
+        help="Click to start comprehensive resume analysis"
+    )
+
+if analyze_button:
+    if fileName is None or not job_desc.strip():
+        st.error("⚠️ Please upload a resume and enter a job description.")
+    else:
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        with st.spinner("🔍 Analyzing resume and job description..."):
+            status_text.text("📄 Extracting text from resume...")
+            progress_bar.progress(8)
+            
+            # Extract text
+            _, ext = os.path.splitext(fileName.name)
+            ext = ext.lower()
+
+            if ext == ".pdf":
+                resume_text = extract_text_from_pdf(fileName)
+            elif ext == ".docx":
+                resume_text = extract_text_from_docx(fileName)
+            elif ext == ".txt":
+                resume_text = extract_text_from_txt(fileName)
+            else:
+                st.error("❌ Unsupported file type.")
+                st.stop()
+
+            status_text.text("🧹 Preprocessing and normalizing...")
+            progress_bar.progress(20)
+            
+            resume_clean = clean_and_normalize_text(resume_text)
+            job_clean = clean_and_normalize_text(job_desc)
+            
+            if not resume_clean or not job_clean:
+                st.error("❌ Could not extract text from files.")
+                st.stop()
+
+            status_text.text("🤖 Computing semantic embeddings...")
+            progress_bar.progress(35)
+            
+            # Initialize
+            semantic_max = semantic_top3 = semantic_top5 = semantic_top10 = semantic_top20 = 0
+            resume_top10 = semantic_avg = tfidf_similarity = keyword_overlap_pct = tech_match = 0
+            length_bonus = 0.85
+            overlapping_keywords = set()
+            
+            if analysis_type in ["Composite Score (Recommended)", "Semantic Only"]:
+                semantic_max, semantic_top3, semantic_top5, semantic_top10, semantic_top20, resume_top10, semantic_avg = calculate_maximum_semantic_similarity(resume_clean, job_clean)
+            
+            progress_bar.progress(50)
+            status_text.text("📊 Analyzing TF-IDF patterns...")
+            
+            if analysis_type in ["Composite Score (Recommended)", "TF-IDF Only"]:
+                tfidf_similarity = calculate_boosted_tfidf(resume_clean, job_clean)
+            
+            progress_bar.progress(65)
+            status_text.text("🔍 Matching keywords extensively...")
+            
+            if analysis_type in ["Composite Score (Recommended)", "Keyword Only"]:
+                keyword_overlap_pct, overlapping_keywords = calculate_ultra_keyword_overlap(resume_clean, job_clean)
+            
+            progress_bar.progress(80)
+            status_text.text("⚙️ Extracting technical skills...")
+            
+            if analysis_type == "Composite Score (Recommended)":
+                tech_match = calculate_technical_match_enhanced(resume_text, job_desc)
+                length_bonus = calculate_length_bonus(resume_text, job_desc)
+
+            status_text.text("📊 Computing final score...")
+            progress_bar.progress(95)
+
+            # Calculate final score
+            if analysis_type == "Composite Score (Recommended)":
+                final_score = calculate_ultra_composite_score(
+                    semantic_max, semantic_top3, semantic_top5, semantic_top10,
+                    tfidf_similarity, keyword_overlap_pct, tech_match, length_bonus
+                )
+                score_type = "Composite"
+            elif analysis_type == "Semantic Only":
+                final_score = ((semantic_max * 0.35 + semantic_top3 * 0.30 + semantic_top5 * 0.20 + semantic_top10 * 0.15) * 100)
+                if final_score > 50:
+                    final_score = 50 + (final_score - 50) * 1.8
+                final_score = min(final_score + 8, 100)  # +8% bonus
+                score_type = "Semantic"
+            elif analysis_type == "Keyword Only":
+                final_score = keyword_overlap_pct
+                if final_score > 40:
+                    final_score = 40 + (final_score - 40) * 1.6
+                final_score = min(final_score + 5, 100)  # +5% bonus
+                score_type = "Keyword Overlap"
+            elif analysis_type == "TF-IDF Only":
+                final_score = tfidf_similarity * 100
+                if final_score > 40:
+                    final_score = 40 + (final_score - 40) * 1.8
+                final_score = min(final_score + 7, 100)  # +7% bonus
+                score_type = "TF-IDF"
+
+            final_score = min(round(final_score, 2), 100)
+            
+            progress_bar.progress(100)
+            status_text.text("✅ Analysis complete!")
+            time.sleep(0.5)
+            
+            progress_bar.empty()
+            status_text.empty()
+
+        # Display results
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        score_html, message = get_score_html(final_score, score_type)
+        st.markdown(score_html, unsafe_allow_html=True)
+        
+        st.info(f"📝 **Analysis Result:** {message}")
+
+        # Detailed analysis
+        if show_details:
+            st.markdown("---")
+            st.markdown("## 📊 Detailed Analysis")
+            
+            if analysis_type == "Composite Score (Recommended)":
+                metric_cols = st.columns(6)
+                
+                metrics = [
+                    (f"{semantic_max*100:.1f}%", "Best Match"),
+                    (f"{semantic_top3*100:.1f}%", "Top 3"),
+                    (f"{semantic_top5*100:.1f}%", "Top 5"),
+                    (f"{tfidf_similarity*100:.1f}%", "TF-IDF"),
+                    (f"{keyword_overlap_pct:.1f}%", "Keywords"),
+                    (f"{tech_match*100:.1f}%", "Tech")
+                ]
+                
+                for col, (value, label) in zip(metric_cols, metrics):
+                    with col:
+                        st.markdown(
+                            get_metric_card_html(value, label),
+                            unsafe_allow_html=True
+                        )
+            else:
+                metric_cols = st.columns(4)
+                
+                metrics = [
+                    (f"{semantic_max*100:.1f}%", "Best Match"),
+                    (f"{semantic_top5*100:.1f}%", "Top 5"),
+                    (f"{tfidf_similarity*100:.1f}%", "TF-IDF"),
+                    (f"{keyword_overlap_pct:.1f}%", "Keywords")
+                ]
+                
+                for col, (value, label) in zip(metric_cols, metrics):
+                    with col:
+                        st.markdown(
+                            get_metric_card_html(value, label),
+                            unsafe_allow_html=True
+                        )
+
+            # Show matching keywords
+            if overlapping_keywords and len(overlapping_keywords) > 0:
+                st.markdown("### 🎯 Matching Keywords & Phrases")
+                top_keywords = sorted(list(overlapping_keywords))[:50]
+                keywords_display = ", ".join(top_keywords)
+                st.success(f"**Found {len(overlapping_keywords)} matching terms:** {keywords_display}")
+                
+                if len(overlapping_keywords) > 50:
+                    with st.expander(f"View all {len(overlapping_keywords)} matches"):
+                        all_keywords = ", ".join(sorted(list(overlapping_keywords)))
+                        st.write(all_keywords)
+
+            # Score visualization
+            if show_visualization and analysis_type == "Composite Score (Recommended)":
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown("### 📈 Score Breakdown")
+                scores_dict = {
+                    "Best": semantic_max * 100,
+                    "Top 3": semantic_top3 * 100,
+                    "Top 5": semantic_top5 * 100,
+                    "TF-IDF": tfidf_similarity * 100,
+                    "Keywords": keyword_overlap_pct,
+                    "Tech": tech_match * 100
+                }
+                fig = create_score_visualization(scores_dict)
+                st.plotly_chart(fig, use_container_width=True)
+            
+            # Additional insights
+            if analysis_type == "Composite Score (Recommended)":
+                st.markdown("---")
+                st.markdown("### 💡 Match Insights")
+                
+                insights = []
+                
+                if semantic_max > 0.85:
+                    insights.append("✅ **Excellent semantic match** - Your resume content strongly aligns with job requirements")
+                elif semantic_max > 0.70:
+                    insights.append("✅ **Strong semantic match** - Good alignment between your experience and the role")
+                elif semantic_max > 0.55:
+                    insights.append("⚠️ **Moderate semantic match** - Consider emphasizing relevant experiences more prominently")
+                else:
+                    insights.append("⚠️ **Lower semantic match** - Try to better align your resume content with job description language")
+                
+                if keyword_overlap_pct > 70:
+                    insights.append("✅ **High keyword coverage** - You've included most important terms from the job posting")
+                elif keyword_overlap_pct > 50:
+                    insights.append("⚠️ **Good keyword coverage** - Consider adding more specific terms from the job description")
+                else:
+                    insights.append("⚠️ **Lower keyword coverage** - Include more exact terms and phrases from the job posting")
+                
+                if tech_match > 0.80:
+                    insights.append("✅ **Excellent technical match** - Your technical skills align very well with requirements")
+                elif tech_match > 0.60:
+                    insights.append("✅ **Good technical match** - Most required technical skills are present")
+                else:
+                    insights.append("⚠️ **Technical skills gap** - Consider highlighting more relevant technical competencies")
+                
+                if tfidf_similarity > 0.75:
+                    insights.append("✅ **Strong content similarity** - Your resume terminology matches industry standards")
+                
+                for insight in insights:
+                    st.markdown(insight)
+
+# Footer
+st.markdown("---")
+st.markdown(get_footer_html(), unsafe_allow_html=True)
 
 
 
