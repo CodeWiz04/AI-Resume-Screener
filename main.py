@@ -34,4 +34,39 @@ st.set_page_config(
 )
 
 # Sidebar theme toggle
+theme = st.sidebar.radio("🎨 Theme Mode", ["Light", "Dark"], index=0)
+
+# Apply custom CSS
+st.markdown(get_custom_css(theme), unsafe_allow_html=True)
+
+# Download required NLTK data (run once)
+@st.cache_resource
+def download_nltk_data():
+    try:
+        nltk.data.find('tokenizers/punkt')
+        nltk.data.find('corpora/stopwords')
+        nltk.data.find('corpora/wordnet')
+    except LookupError:
+        nltk.download('punkt')
+        nltk.download('stopwords')
+        nltk.download('wordnet')
+
+download_nltk_data()
+
+# ---------- FILE READING FUNCTIONS ----------
+def extract_text_from_pdf(file):
+    text = ""
+    with fitz.open(stream=file.read(), filetype="pdf") as doc:
+        for page in doc:
+            text += page.get_text()
+    return text
+
+def extract_text_from_docx(file):
+    doc = Document(file)
+    return "\n".join([para.text for para in doc.paragraphs])
+
+def extract_text_from_txt(file):
+    return file.read().decode("utf-8")
+
+# ---------- ULTRA-AGGRESSIVE TEXT PROCESSING ----------
 
