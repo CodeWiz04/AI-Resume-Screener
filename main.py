@@ -69,4 +69,93 @@ def extract_text_from_txt(file):
     return file.read().decode("utf-8")
 
 # ---------- ULTRA-AGGRESSIVE TEXT PROCESSING ----------
+def clean_and_normalize_text(text, aggressive=True):
+    """Maximum preservation text cleaning"""
+    text = text.lower()
+    
+    # Preserve ALL technical terms and variations
+    replacements = {
+        r'c\+\+': 'cplusplus cpp',
+        r'c#': 'csharp',
+        r'\.net': 'dotnet net',
+        r'node\.?js': 'nodejs node javascript',
+        r'react\.?js': 'reactjs react javascript',
+        r'vue\.?js': 'vuejs vue javascript',
+        r'angular\.?js': 'angularjs angular javascript',
+        r'express\.?js': 'expressjs express nodejs',
+        r'next\.?js': 'nextjs next react',
+        r'typescript': 'typescript javascript',
+        r'javascript': 'javascript js',
+        r'html5': 'html html5',
+        r'css3': 'css css3',
+        r'mongodb': 'mongodb mongo database',
+        r'postgresql': 'postgresql postgres sql database',
+        r'mysql': 'mysql sql database',
+    }
+    
+    for pattern, replacement in replacements.items():
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+    
+    # Keep alphanumeric and spaces
+    text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)
+    text = ' '.join(text.split())
+    
+    return text
+
+def extract_all_terms_exhaustive(text):
+    """Extract EVERY possible meaningful combination"""
+    text_lower = text.lower()
+    word_list = text_lower.split()
+    
+    all_terms = set()
+    
+    # Single words (1+ chars, very lenient)
+    all_terms.update([w for w in word_list if len(w) > 0])
+    
+    # 2-word phrases
+    for i in range(len(word_list) - 1):
+        all_terms.add(f"{word_list[i]} {word_list[i+1]}")
+    
+    # 3-word phrases
+    for i in range(len(word_list) - 2):
+        all_terms.add(f"{word_list[i]} {word_list[i+1]} {word_list[i+2]}")
+    
+    # 4-word phrases
+    for i in range(len(word_list) - 3):
+        all_terms.add(f"{word_list[i]} {word_list[i+1]} {word_list[i+2]} {word_list[i+3]}")
+    
+    # 5-word phrases (for very specific requirements)
+    for i in range(len(word_list) - 4):
+        all_terms.add(f"{word_list[i]} {word_list[i+1]} {word_list[i+2]} {word_list[i+3]} {word_list[i+4]}")
+    
+    return all_terms
+
+def calculate_ultra_keyword_overlap(resume_text, job_text):
+    """Maximum possible keyword matching with multiple strategies"""
+    
+    # Strategy 1: Extract ALL possible terms
+    resume_all_terms = extract_all_terms_exhaustive(resume_text)
+    job_all_terms = extract_all_terms_exhaustive(job_text)
+    
+    if not job_all_terms:
+        return 85.0, set()  # Very high default
+    
+    matched_terms = set()
+    
+    # Level 1: Exact matches
+    exact_matches = resume_all_terms.intersection(job_all_terms)
+    matched_terms.update(exact_matches)
+    
+    # Level 2: Substring matches (one contains the other)
+    for job_term in job_all_terms:
+        if job_term in matched_terms:
+            continue
+        for resume_term in resume_all_terms:
+            if len(job_term) > 1 and len(resume_term) > 1:
+                if job_term in resume_term or resume_term in job_term:
+                    matched_terms.add(job_term)
+                    break
+    
+    # Level 3: Word overlap in phrases (any common word)
+
 
