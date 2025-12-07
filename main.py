@@ -630,7 +630,7 @@ if analyze_button:
             elif analysis_type == "Semantic Only":
                 final_score = ((semantic_max * 0.35 + semantic_top3 * 0.30 + semantic_top5 * 0.20 + semantic_top10 * 0.15) * 100)
                 if final_score > 50:
-                    final_score = 50 + (final_score - 50) * 1.8
+                    final_score = 50 + (final_score - 50) * 1
                 final_score = min(final_score + 8, 100)  # +8% bonus
                 score_type = "Semantic"
             elif analysis_type == "Keyword Only":
