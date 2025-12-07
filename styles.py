@@ -1,7 +1,4 @@
-"""
-Enhanced UI Styling for AI Resume Screener
-Modern, eye-catching design with smooth animations
-"""
+
 
 def get_custom_css(theme="Light"):
     """
