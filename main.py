@@ -269,3 +269,53 @@ with col2:
         help="Include the complete job posting for better analysis",
         label_visibility="collapsed"
     )
+
+# Analysis button with custom styling
+st.markdown("<br>", unsafe_allow_html=True)
+col_center = st.columns([1, 2, 1])[1]
+with col_center:
+    analyze_button = st.button(
+        "🚀 Analyze Resume Match",
+        type="primary",
+        use_container_width=True,
+        help="Click to start comprehensive resume analysis"
+    )
+
+if analyze_button:
+    if fileName is None or not job_desc.strip():
+        st.error("⚠ Please upload a resume and enter a job description.")
+    else:
+        # Progress indicator
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        with st.spinner("🔍 Analyzing resume and job description..."):
+            # Update progress
+            status_text.text("📄 Extracting text from resume...")
+            progress_bar.progress(20)
+            
+            # Extract text
+            _, ext = os.path.splitext(fileName.name)
+            ext = ext.lower()
+
+            if ext == ".pdf":
+                resume_text = extract_text_from_pdf(fileName)
+            elif ext == ".docx":
+                resume_text = extract_text_from_docx(fileName)
+            elif ext == ".txt":
+                resume_text = extract_text_from_txt(fileName)
+            else:
+                st.error("❌ Unsupported file type.")
+                st.stop()
+
+            # Clean texts
+            status_text.text("🧹 Cleaning and preprocessing text...")
+            progress_bar.progress(40)
+            
+            resume_clean = clean_and_normalize_text(resume_text)
+            job_clean = clean_and_normalize_text(job_desc)
+            
+            if not resume_clean or not job_clean:
+                st.error("❌ Could not extract text from the uploaded file or job description is empty.")
+                st.stop()
+
