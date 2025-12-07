@@ -198,7 +198,7 @@ def calculate_ultra_keyword_overlap(resume_text, job_text):
                 break
     
     # Calculate base percentage
-base_percentage = (len(matched_terms) / len(job_all_terms)) * 100
+    base_percentage = (len(matched_terms) / len(job_all_terms)) * 100
     
     # Apply AGGRESSIVE boost curve
     if base_percentage > 60:
@@ -769,6 +769,3 @@ if analyze_button:
 # Footer
 st.markdown("---")
 st.markdown(get_footer_html(), unsafe_allow_html=True)
-
-
-
