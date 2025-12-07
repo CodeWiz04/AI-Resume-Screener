@@ -319,3 +319,26 @@ if analyze_button:
                 st.error("❌ Could not extract text from the uploaded file or job description is empty.")
                 st.stop()
 
+    # Perform analysis
+            status_text.text("🤖 Running AI analysis...")
+            progress_bar.progress(60)
+            
+            # Initialize variables
+            semantic_max = semantic_avg = tfidf_similarity = keyword_overlap_pct = 0
+            overlapping_keywords = set()
+            
+            if analysis_type in ["Composite Score (Recommended)", "Semantic Only"]:
+                semantic_max, semantic_avg = calculate_semantic_similarity(resume_clean, job_clean)
+                
+            if analysis_type in ["Composite Score (Recommended)", "TF-IDF Only"]:
+                tfidf_similarity = calculate_tfidf_similarity(resume_clean, job_clean)
+                
+            if analysis_type in ["Composite Score (Recommended)", "Keyword Only"]:
+                resume_keywords = extract_keywords(resume_clean)
+                job_keywords = extract_keywords(job_clean)
+                keyword_overlap_pct, overlapping_keywords = calculate_keyword_overlap(resume_keywords, job_keywords)
+
+            status_text.text("📊 Calculating final scores...")
+            progress_bar.progress(80)
+
+        
